@@ -1,11 +1,20 @@
 from PySide6.QtWidgets import (QWidget,
                                QVBoxLayout,
                                QHBoxLayout,
-                               QPushButton)
-#from wholebrain.Observables import FC
+                               QPushButton,
+                               QDialog)
+from wholebrain.Observables import (FC, phFCD, swFCD)
 from widgets.series.MultipleLineChart import MultipleLineChart
 from widgets.series.RangeControlWidget import RangeControlWidget
+from src.widgets.HeatMap import HeatMap
+import numpy as np
 
+import wholebrain.Observables.BOLDFilters as filters
+
+filters.k = 2  # 2nd order butterworth filter
+filters.flp = .008  # lowpass frequency of filter
+filters.fhi = .08  # highpass
+filters.TR = 0.754  # sampling interval
 
 class DataTab(QWidget):
     def __init__(self, data):
@@ -24,10 +33,19 @@ class DataTab(QWidget):
         self.control_layout = QHBoxLayout()
         self.to_edit_button = QPushButton("&Edit Chart", self)
         self.to_edit_button.clicked.connect(self.change_layout)
+        self.control_layout.addWidget(self.to_edit_button)
+
         self.compute_fc_button = QPushButton("&Compute FC", self)
         self.compute_fc_button.clicked.connect(self.fc)
-        self.control_layout.addWidget(self.to_edit_button)
         self.control_layout.addWidget(self.compute_fc_button)
+
+        self.compute_phase_button = QPushButton("&Compute Phase", self)
+        self.compute_phase_button.clicked.connect(self.phase)
+        self.control_layout.addWidget(self.compute_phase_button)
+
+        self.compute_sw_button = QPushButton("&Compute SW", self)
+        self.compute_sw_button.clicked.connect(self.sw)
+        self.control_layout.addWidget(self.compute_sw_button)
 
         # Plot layout
         self.plot_layout = QHBoxLayout()
@@ -70,11 +88,32 @@ class DataTab(QWidget):
 
     def sw(self):
         print("calculating sw...")
+        r_min, r_max = self.chart.get_range(False)
+        m = swFCD.from_fMRI(self.data[r_min:r_max].T)
+        dlg = FCHeatMap(swFCD.buildFullMatrix(m))
+        dlg.exec()
 
     def phase(self):
         print("calculating phase..")
+        r_min, r_max = self.chart.get_range(False)
+        m = phFCD.from_fMRI(self.data[r_min:r_max].T)
+        dlg = FCHeatMap(phFCD.buildFullMatrix(m))
+        dlg.exec()
 
     def fc(self):
         print("calculating fc...")
+        r_min, r_max = self.chart.get_range(False)
+        m = FC.from_fMRI(self.data[r_min:r_max].T)
+        dlg = FCHeatMap(m)
+        dlg.exec()
 
 
+class FCHeatMap(QDialog):
+    def __init__(self, data):
+        super().__init__()
+
+        self.setWindowTitle("Functional connectivity")
+
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(HeatMap(np.corrcoef(data)))
+        self.setLayout(self.layout)
