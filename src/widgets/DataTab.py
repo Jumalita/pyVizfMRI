@@ -45,6 +45,7 @@ class DataTab(QWidget):
     def change_layout(self):
         # Toggle between control and edit layouts when the button is clicked
         if self.editing:
+            self.range_control_widget.relocate_range()
             self.chart.change_mode(True)
             self.show_edit_layout()
         else:

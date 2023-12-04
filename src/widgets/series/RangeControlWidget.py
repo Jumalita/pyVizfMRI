@@ -29,11 +29,15 @@ class RangeControlWidget(QWidget):
 
         self.range_slider.valueChanged.connect(lambda e: self.change_value(e))
 
+    def relocate_range(self):
+        loc_min, loc_max = self.multiple_line_chart.get_range(False)
+        self.range_slider.setValue((loc_min, loc_max))
+
     def change_value(self, range_tuple):
         self.multiple_line_chart.move_vertical_line(range_tuple[0], range_tuple[1])
 
     def on_accept(self):
-        self.multiple_line_chart.change_range(range(self.range_slider.value()[0], self.range_slider.value()[1]))
+        self.multiple_line_chart.change_range(range(self.range_slider.value()[0], self.range_slider.value()[1]+1))
         self.on_cancel_function()
 
     def on_cancel(self):
