@@ -42,8 +42,8 @@ class MainWindow(QMainWindow):
     def open_file(self):
         filenames, _ = QFileDialog.getOpenFileNames(
             parent=self,
-            caption="Open NPY/Mat/Nii files...",
-            filter="fMRI files (*.npy *.mat *.nii)"
+            caption="Open NPY/Mat/Nii/TXT files...",
+            filter="fMRI files (*.npy *.mat *.nii *.txt)"
         )
         if filenames:
             for file in filenames:
@@ -54,9 +54,19 @@ class MainWindow(QMainWindow):
                     data = img.get_fdata()
                 elif file.endswith(".npy"):
                     data = np.load(file)
+                elif file.endswith(".txt"):
+                    result = []
+                    with open(file, 'r') as stream:
+                        lines = stream.readlines()
+                        for line in lines:
+                            values = [float(val) for val in line.strip().replace(' ', '\t').split('\t')]
+                            result.append(values)
+                    data = np.array(result)
                 else:
                     raise ValueError("Reading file with incorrect format")
 
+                print(data)
+                print(data.shape)
                 if len(data.shape) == 3:
                     for i in range(0, data.shape[0]):
                         suffix = f"_{i}" if data.shape[0] > 1 else ""

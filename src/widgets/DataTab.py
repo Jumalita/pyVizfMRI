@@ -3,10 +3,12 @@ from PySide6.QtWidgets import (QWidget,
                                QHBoxLayout,
                                QPushButton,
                                QDialog)
-from wholebrain.Observables import (FC, phFCD, swFCD)
+from wholebrain.Observables import (FC, phFCD, swFCD, GBC)
 from widgets.series.MultipleLineChart import MultipleLineChart
 from widgets.series.RangeControlWidget import RangeControlWidget
 from src.widgets.HeatMap import HeatMap
+from src.widgets.Print3DBrain import Print3DBrain
+from src.widgets.Histogram import VectorHeatmap
 import numpy as np
 
 import wholebrain.Observables.BOLDFilters as filters
@@ -15,6 +17,7 @@ filters.k = 2  # 2nd order butterworth filter
 filters.flp = .008  # lowpass frequency of filter
 filters.fhi = .08  # highpass
 filters.TR = 0.754  # sampling interval
+
 
 class DataTab(QWidget):
     def __init__(self, data):
@@ -38,14 +41,27 @@ class DataTab(QWidget):
         self.compute_fc_button = QPushButton("&Compute FC", self)
         self.compute_fc_button.clicked.connect(self.fc)
         self.control_layout.addWidget(self.compute_fc_button)
+        self.dialog_fc = None
 
         self.compute_phase_button = QPushButton("&Compute Phase", self)
         self.compute_phase_button.clicked.connect(self.phase)
         self.control_layout.addWidget(self.compute_phase_button)
+        self.dialog_phase = None
 
         self.compute_sw_button = QPushButton("&Compute SW", self)
         self.compute_sw_button.clicked.connect(self.sw)
         self.control_layout.addWidget(self.compute_sw_button)
+        self.dialog_sw = None
+
+        self.compute_gbc_button = QPushButton("&Compute GBC", self)
+        self.compute_gbc_button.clicked.connect(self.gbc)
+        self.control_layout.addWidget(self.compute_gbc_button)
+        self.dialog_gbc = None
+
+        self.compute_3Dgbc_button = QPushButton("&Compute 3D GBC", self)
+        self.compute_3Dgbc_button.clicked.connect(self.gbc3D)
+        self.control_layout.addWidget(self.compute_3Dgbc_button)
+        self.dialog_gbc3D = None
 
         # Plot layout
         self.plot_layout = QHBoxLayout()
@@ -76,6 +92,10 @@ class DataTab(QWidget):
         self.range_control_widget.hide()
         self.to_edit_button.show()
         self.compute_fc_button.show()
+        self.compute_phase_button.show()
+        self.compute_sw_button.show()
+        self.compute_gbc_button.show()
+        self.compute_3Dgbc_button.show()
         self.control_layout.activate()
         self.edit_layout.invalidate()
 
@@ -83,6 +103,10 @@ class DataTab(QWidget):
         self.range_control_widget.show()
         self.to_edit_button.hide()
         self.compute_fc_button.hide()
+        self.compute_phase_button.hide()
+        self.compute_sw_button.hide()
+        self.compute_gbc_button.hide()
+        self.compute_3Dgbc_button.hide()
         self.control_layout.invalidate()
         self.edit_layout.activate()
 
@@ -90,30 +114,56 @@ class DataTab(QWidget):
         print("calculating sw...")
         r_min, r_max = self.chart.get_range(False)
         m = swFCD.from_fMRI(self.data[r_min:r_max].T)
-        dlg = FCHeatMap(swFCD.buildFullMatrix(m))
-        dlg.exec()
+        self.dialog_sw = FCHeatMap(swFCD.buildFullMatrix(m))
+        self.dialog_sw.show()
 
     def phase(self):
         print("calculating phase..")
         r_min, r_max = self.chart.get_range(False)
-        m = phFCD.from_fMRI(self.data[r_min:r_max].T)
-        dlg = FCHeatMap(phFCD.buildFullMatrix(m))
-        dlg.exec()
+        m = phFCD.from_fMRI(self.data[r_min:r_max].T, applyFilters=False)
+        self.dialog_phase = FCHeatMap(phFCD.buildFullMatrix(m))
+        self.dialog_phase.show()
 
     def fc(self):
         print("calculating fc...")
         r_min, r_max = self.chart.get_range(False)
         m = FC.from_fMRI(self.data[r_min:r_max].T)
-        dlg = FCHeatMap(m)
-        dlg.exec()
+        self.dialog_fc = FCHeatMap(m)
+        self.dialog_fc.show()
+
+    def gbc(self):
+        print("calculating gbc...")
+        r_min, r_max = self.chart.get_range(False)
+        m = GBC.from_fMRI(self.data[r_min:r_max].T)
+        self.dialog_gbc = FCHeatMap(m, is_vector=True)
+        self.dialog_gbc.show()
+
+    def gbc3D(self):
+        print("calculating 3D gbc...")
+        r_min, r_max = self.chart.get_range(False)
+        m = GBC.from_fMRI(self.data[r_min:r_max].T)
+        self.dialog_gbc3D = FC3D(m)
+        self.dialog_gbc3D.show()
 
 
 class FCHeatMap(QDialog):
-    def __init__(self, data):
+    def __init__(self, data, is_vector=False):
         super().__init__()
 
         self.setWindowTitle("Functional connectivity")
 
         self.layout = QVBoxLayout()
-        self.layout.addWidget(HeatMap(np.corrcoef(data)))
+        if is_vector:
+            self.layout.addWidget(VectorHeatmap(data))
+        else:
+            self.layout.addWidget(HeatMap(np.corrcoef(data)))
+        self.setLayout(self.layout)
+
+class FC3D(QDialog):
+    def __init__(self, data):
+        super().__init__()
+
+        self.setWindowTitle("Functional connectivity")
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(Print3DBrain(data))
         self.setLayout(self.layout)
