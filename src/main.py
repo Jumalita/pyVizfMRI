@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (QApplication,
                                QMainWindow,
                                QTabWidget,
                                QToolBar,
+                               QMessageBox,
                                QFileDialog)
 from PySide6.QtGui import QAction
 from pathlib import Path
@@ -24,6 +25,8 @@ class MainWindow(QMainWindow):
         self.tabs = QTabWidget()
         self.tabs.setTabPosition(QTabWidget.TabPosition.North)
         self.tabs.setMovable(True)
+        self.tabs.tabCloseRequested.connect(self.delete_data_tab)
+        self.tabs.setTabsClosable(True)
 
         self.setCentralWidget(self.tabs)
 
@@ -76,6 +79,15 @@ class MainWindow(QMainWindow):
         tab = DataTab(data, name)
         self.tabs.addTab(tab, name)
         # self.tab_names[name] = w
+    def delete_data_tab(self,index):
+        dlg = QMessageBox(self)
+        dlg.setWindowTitle("Alert!")
+        dlg.setText("Closing this tab will make you lose your work and its corresponding dialogs. Cointinue?")
+        dlg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        button = dlg.exec()
+        if button == QMessageBox.Yes:
+            self.tabs.widget(index).before_close()
+            self.tabs.removeTab(index)
 
 
 app = QApplication(sys.argv)

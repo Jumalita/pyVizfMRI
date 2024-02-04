@@ -116,7 +116,7 @@ class DataTab(QWidget):
         r_min, r_max = self.chart.get_range(False)
         m = swFCD.from_fMRI(self.data[r_min:r_max].T)
         self.dialog_sw = FCHeatMap(swFCD.buildFullMatrix(m))
-        self.dialog_gbc3D.setWindowTitle("SW " + self.name)
+        self.dialog_sw.setWindowTitle("SW " + self.name)
         self.dialog_sw.show()
 
     def phase(self):
@@ -124,7 +124,7 @@ class DataTab(QWidget):
         r_min, r_max = self.chart.get_range(False)
         m = phFCD.from_fMRI(self.data[r_min:r_max].T, applyFilters=False)
         self.dialog_phase = FCHeatMap(phFCD.buildFullMatrix(m))
-        self.dialog_gbc3D.setWindowTitle("Phase " + self.name)
+        self.dialog_phase.setWindowTitle("Phase " + self.name)
         self.dialog_phase.show()
 
     def fc(self):
@@ -132,7 +132,7 @@ class DataTab(QWidget):
         r_min, r_max = self.chart.get_range(False)
         m = FC.from_fMRI(self.data[r_min:r_max].T)
         self.dialog_fc = FCHeatMap(m)
-        self.dialog_gbc3D.setWindowTitle("FC " + self.name)
+        self.dialog_fc.setWindowTitle("FC " + self.name)
         self.dialog_fc.show()
 
     def gbc(self):
@@ -140,17 +140,28 @@ class DataTab(QWidget):
         r_min, r_max = self.chart.get_range(False)
         m = GBC.from_fMRI(self.data[r_min:r_max])
         self.dialog_gbc = FCHeatMap(m, is_vector=True)
-        self.dialog_gbc3D.setWindowTitle("GCB " + self.name)
+        self.dialog_gbc.setWindowTitle("GCB " + self.name)
         self.dialog_gbc.show()
-
 
     def gbc3D(self):
         print("calculating 3D gbc...")
         r_min, r_max = self.chart.get_range(False)
-        m = GBC.from_fMRI(self.data[:,r_min:r_max])
+        m = GBC.from_fMRI(self.data[:, r_min:r_max])
         self.dialog_gbc3D = FC3D(m)
         self.dialog_gbc3D.setWindowTitle("3D Brain " + self.name)
         self.dialog_gbc3D.show()
+
+    def before_close(self):
+        if self.dialog_fc:
+            self.dialog_fc.close()
+        if self.dialog_gbc:
+            self.dialog_gbc.close()
+        if self.dialog_gbc3D:
+            self.dialog_gbc3D.close()
+        if self.dialog_sw:
+            self.dialog_sw.close()
+        if self.dialog_phase:
+            self.dialog_phase.close()
 
 
 class FCHeatMap(QDialog):
