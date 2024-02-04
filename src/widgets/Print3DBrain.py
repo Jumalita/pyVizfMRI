@@ -4,6 +4,7 @@ from wholebrain.Utils.plot3DBrain_Utils import setUpGlasser360, multiview5
 from matplotlib import cm, pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from wholebrain.Utils.plot3DBrain import *
+import nibabel as nib
 
 class Print3DBrain(QWidget):
     def __init__(self, data):
@@ -16,13 +17,11 @@ class Print3DBrain(QWidget):
         self.setLayout(self.layout)
         self.plot_3d_brain(data)
 
-    def plot_3d_brain(self,data):
+    def plot_3d_brain(self,b_data):
         crtx = setUpGlasser360()
-        testData = np.arange(0, 360)
-        data = {'func_L': testData, 'func_R': testData}
+        data = {'func_L': b_data, 'func_R': b_data}
         testColors = cm.YlOrBr
-
-        self.plt_brainview(crtx, data, 360, testColors, lightingBias=0.1, mode='flatWire', shadowed=True)
+        self.plt_brainview(crtx, data, len(b_data), testColors, lightingBias=0.1, mode='flatWire', shadowed=True)
         self.canvas.draw()
 
     def plt_brainview(self, cortex, data, numRegions, cmap=plt.cm.coolwarm,

@@ -14,6 +14,6 @@ class VectorHeatmap(QWidget):
         self.plot_heatmap(data)
 
     def plot_heatmap(self,data):
-        sns = heatmap([data])
+        sns = heatmap([data],square=True)
         plt.show()
         self.canvas.draw()
