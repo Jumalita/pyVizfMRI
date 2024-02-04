@@ -20,9 +20,10 @@ filters.TR = 0.754  # sampling interval
 
 
 class DataTab(QWidget):
-    def __init__(self, data):
+    def __init__(self, data, name):
         super().__init__()
         self.data = data
+        self.name = name
         self.editing = False
 
         self.chart = MultipleLineChart(data)
@@ -115,6 +116,7 @@ class DataTab(QWidget):
         r_min, r_max = self.chart.get_range(False)
         m = swFCD.from_fMRI(self.data[r_min:r_max].T)
         self.dialog_sw = FCHeatMap(swFCD.buildFullMatrix(m))
+        self.dialog_gbc3D.setWindowTitle("SW " + self.name)
         self.dialog_sw.show()
 
     def phase(self):
@@ -122,6 +124,7 @@ class DataTab(QWidget):
         r_min, r_max = self.chart.get_range(False)
         m = phFCD.from_fMRI(self.data[r_min:r_max].T, applyFilters=False)
         self.dialog_phase = FCHeatMap(phFCD.buildFullMatrix(m))
+        self.dialog_gbc3D.setWindowTitle("Phase " + self.name)
         self.dialog_phase.show()
 
     def fc(self):
@@ -129,6 +132,7 @@ class DataTab(QWidget):
         r_min, r_max = self.chart.get_range(False)
         m = FC.from_fMRI(self.data[r_min:r_max].T)
         self.dialog_fc = FCHeatMap(m)
+        self.dialog_gbc3D.setWindowTitle("FC " + self.name)
         self.dialog_fc.show()
 
     def gbc(self):
@@ -136,6 +140,7 @@ class DataTab(QWidget):
         r_min, r_max = self.chart.get_range(False)
         m = GBC.from_fMRI(self.data[r_min:r_max])
         self.dialog_gbc = FCHeatMap(m, is_vector=True)
+        self.dialog_gbc3D.setWindowTitle("GCB " + self.name)
         self.dialog_gbc.show()
 
 
@@ -144,14 +149,13 @@ class DataTab(QWidget):
         r_min, r_max = self.chart.get_range(False)
         m = GBC.from_fMRI(self.data[:,r_min:r_max])
         self.dialog_gbc3D = FC3D(m)
+        self.dialog_gbc3D.setWindowTitle("3D Brain " + self.name)
         self.dialog_gbc3D.show()
 
 
 class FCHeatMap(QDialog):
     def __init__(self, data, is_vector=False):
         super().__init__()
-
-        self.setWindowTitle("Functional connectivity")
 
         self.layout = QVBoxLayout()
         if is_vector:
@@ -160,11 +164,11 @@ class FCHeatMap(QDialog):
             self.layout.addWidget(HeatMap(np.corrcoef(data)))
         self.setLayout(self.layout)
 
+
 class FC3D(QDialog):
     def __init__(self, data):
         super().__init__()
 
-        self.setWindowTitle("Functional connectivity")
         self.layout = QVBoxLayout()
         self.layout.addWidget(Print3DBrain(data))
         self.setLayout(self.layout)

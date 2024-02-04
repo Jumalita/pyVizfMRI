@@ -73,7 +73,7 @@ class MainWindow(QMainWindow):
                     self.add_data_tab(data, Path(file).stem)
 
     def add_data_tab(self, data, name):
-        tab = DataTab(data)
+        tab = DataTab(data, name)
         self.tabs.addTab(tab, name)
         # self.tab_names[name] = w
 
