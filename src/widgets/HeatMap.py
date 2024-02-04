@@ -1,21 +1,27 @@
-import pyqtgraph as pg
+import seaborn as sns
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PySide6.QtWidgets import QWidget, QVBoxLayout
-
 
 class HeatMap(QWidget):
     def __init__(self, data):
         super().__init__()
 
-        glw = pg.GraphicsLayoutWidget()
-        self.img = pg.ImageItem(image=data)  # create monochrome image from demonstration data
-        pl = glw.addPlot()
-        pl.addItem(self.img)
-        pl.addColorBar(self.img, colorMap='cividis', values=(0, 1), limits=(0, 1))
-        pl.setAspectLocked()
+        self.figure, self.ax = plt.subplots()
+        self.canvas = FigureCanvas(self.figure)
         self.layout = QVBoxLayout()
-        self.layout.addWidget(glw)
+        self.layout.addWidget(self.canvas)
         self.setLayout(self.layout)
 
-    def update_data(self, data) -> None:
-        self.img.setImage(data)
+        self.update_data(data)
+
+    def update_data(self, data):
+        # Clear previous heatmap
+        self.ax.clear()
+
+        # Create a heatmap using seaborn
+        sns.heatmap(data, ax=self.ax, cmap='cividis', cbar=True, cbar_kws={'label': 'Values'})
+
+        # Redraw canvas
+        self.canvas.draw()
         self.update()
