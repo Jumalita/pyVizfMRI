@@ -1,5 +1,6 @@
 from PySide6.QtCharts import QChart, QChartView, QLineSeries
 from PySide6.QtGui import QPainter, QPen
+import numpy as np
 
 from utils import hash_to_color, draw_vertical_line
 
@@ -8,9 +9,14 @@ class MultipleLineChart:
     def __init__(self, data):
         self.data = data
         self.series_list = []
+
+        self.y_range = {}
+        self.y_range['min'] = min(x for xs in data for x in xs)
+        self.y_range['max'] = max(x for xs in data for x in xs)
+
         self.chart = QChart()
-        self.changeRangeLineMin = draw_vertical_line(0)
-        self.changeRangeLineMax = draw_vertical_line(data.shape[0]-1)
+        self.changeRangeLineMin = draw_vertical_line(0, self.y_range['min'], self.y_range['max'])
+        self.changeRangeLineMax = draw_vertical_line(data.shape[0]-1, self.y_range['min'], self.y_range['max'])
 
         self.range = range(0, data.shape[0])
 
@@ -53,8 +59,8 @@ class MultipleLineChart:
         self.chart.removeAllSeries()
 
         self.calculate_series()
-        self.changeRangeLineMax = draw_vertical_line(x_max)
-        self.changeRangeLineMin = draw_vertical_line(x_min)
+        self.changeRangeLineMax = draw_vertical_line(x_max, self.y_range['min'], self.y_range['max'])
+        self.changeRangeLineMin = draw_vertical_line(x_min, self.y_range['min'], self.y_range['max'])
         self.chart.addSeries(self.changeRangeLineMin)
         self.chart.addSeries(self.changeRangeLineMax)
 
