@@ -18,11 +18,11 @@ def hash_to_color(input_number):
     return QColor(r, g, b)
 
 
-def draw_vertical_line(x):
+def draw_vertical_line(x, y_min=-2, y_max=2):
     # Create a vertical line series
     line_series = QLineSeries()
-    line_series.append(x, -1)
-    line_series.append(x, 2)
+    line_series.append(x, y_min)
+    line_series.append(x, y_max)
 
     # Set pen properties for the line (you can customize as needed)
     pen = line_series.pen()

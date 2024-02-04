@@ -16,12 +16,9 @@ class HeatMap(QWidget):
         self.update_data(data)
 
     def update_data(self, data):
-        # Clear previous heatmap
         self.ax.clear()
 
-        # Create a heatmap using seaborn
         sns.heatmap(data, ax=self.ax, cmap='cividis', cbar=True, cbar_kws={'label': 'Values'})
 
-        # Redraw canvas
         self.canvas.draw()
         self.update()
