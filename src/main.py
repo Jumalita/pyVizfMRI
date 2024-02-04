@@ -78,8 +78,8 @@ class MainWindow(QMainWindow):
     def add_data_tab(self, data, name):
         tab = DataTab(data, name)
         self.tabs.addTab(tab, name)
-        # self.tab_names[name] = w
-    def delete_data_tab(self,index):
+
+    def delete_data_tab(self, index):
         dlg = QMessageBox(self)
         dlg.setWindowTitle("Alert!")
         dlg.setText("Closing this tab will make you lose your work and its corresponding dialogs. Cointinue?")
