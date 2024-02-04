@@ -134,14 +134,15 @@ class DataTab(QWidget):
     def gbc(self):
         print("calculating gbc...")
         r_min, r_max = self.chart.get_range(False)
-        m = GBC.from_fMRI(self.data[r_min:r_max].T)
+        m = GBC.from_fMRI(self.data[r_min:r_max])
         self.dialog_gbc = FCHeatMap(m, is_vector=True)
         self.dialog_gbc.show()
+
 
     def gbc3D(self):
         print("calculating 3D gbc...")
         r_min, r_max = self.chart.get_range(False)
-        m = GBC.from_fMRI(self.data[r_min:r_max].T)
+        m = GBC.from_fMRI(self.data[:,r_min:r_max])
         self.dialog_gbc3D = FC3D(m)
         self.dialog_gbc3D.show()
 
