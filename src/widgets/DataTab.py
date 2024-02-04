@@ -120,7 +120,7 @@ class DataTab(QWidget):
         self.dialog_sw.show()
 
     def phase(self):
-        print("calculating phase..")
+        print("calculating phase...")
         r_min, r_max = self.chart.get_range(False)
         m = phFCD.from_fMRI(self.data[r_min:r_max].T, applyFilters=False)
         self.dialog_phase = FCHeatMap(phFCD.buildFullMatrix(m))

@@ -19,10 +19,8 @@ class Print3DBrain(QWidget):
 
     def plot_3d_brain(self,b_data):
         crtx = setUpGlasser360()
-        testData = np.arange(0, 360)
-        data = {'func_L': b_data, 'func_R': b_data} # {'func_L': testData, 'func_R': testData}
+        data = {'func_L': b_data, 'func_R': b_data}
         testColors = cm.YlOrBr
-        print(len(b_data))
         self.plt_brainview(crtx, data, len(b_data), testColors, lightingBias=0.1, mode='flatWire', shadowed=True)
         self.canvas.draw()
 
