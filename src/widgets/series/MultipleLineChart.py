@@ -51,6 +51,9 @@ class MultipleLineChart:
         else:
             return min(self.range), max(self.range)
 
+    def get_data(self):
+        return self.data
+
     def change_range(self, new_range):
         self.range = new_range
         self.calculate_series()
