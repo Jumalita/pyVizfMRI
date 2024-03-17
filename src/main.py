@@ -43,37 +43,36 @@ class MainWindow(QMainWindow):
         file_menu.addAction(open_file_action)
 
     def open_file(self):
-        filenames, _ = QFileDialog.getOpenFileNames(
+        filename, _ = QFileDialog.getOpenFileName(
             parent=self,
             caption="Open NPY/Mat/Nii/TXT files...",
             filter="fMRI files (*.npy *.mat *.nii *.txt)"
         )
-        if filenames:
-            for file in filenames:
-                if file.endswith(".mat"):  # TODO: recheck
-                    data = sio.loadmat(file)['fc_s0003']
-                elif file.endswith(".nii"):
-                    img = nib.load(file)
-                    data = img.get_fdata()
-                elif file.endswith(".npy"):
-                    data = np.load(file)
-                elif file.endswith(".txt"):
-                    result = []
-                    with open(file, 'r') as stream:
-                        lines = stream.readlines()
-                        for line in lines:
-                            values = [float(val) for val in line.strip().replace(' ', '\t').split('\t')]
-                            result.append(values)
-                    data = np.array(result)
-                else:
-                    raise ValueError("Reading file with incorrect format")
+        if filename:
+            if filename.endswith(".mat"):  # TODO: recheck -give a selector if more than one dict
+                data = sio.loadmat(filename)['fc_s0003']
+            elif filename.endswith(".nii"):
+                img = nib.load(filename)
+                data = img.get_fdata()
+            elif filename.endswith(".npy"):
+                data = np.load(filename)
+            elif filename.endswith(".txt"):
+                result = []
+                with open(filename, 'r') as stream:
+                    lines = stream.readlines()
+                    for line in lines:
+                        values = [float(val) for val in line.strip().replace(' ', '\t').split('\t')]
+                        result.append(values)
+                data = np.array(result)
+            else:
+                raise ValueError("Reading file with incorrect format")
 
-                if len(data.shape) == 3:
-                    for i in range(0, data.shape[0]):
-                        suffix = f"_{i}" if data.shape[0] > 1 else ""
-                        self.add_data_tab(data[i], Path(file).stem + suffix)
-                elif len(data.shape) == 2:
-                    self.add_data_tab(data, Path(file).stem)
+            if len(data.shape) == 3:
+                for i in range(0, data.shape[0]):
+                    suffix = f"_{i}" if data.shape[0] > 1 else ""
+                    self.add_data_tab(data[i], Path(filename).stem + suffix)
+            elif len(data.shape) == 2:
+                self.add_data_tab(data, Path(filename).stem)
 
     def add_data_tab(self, data, name):
         tab = DataTab(data, name)

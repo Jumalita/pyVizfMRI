@@ -1,9 +1,14 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QFileDialog, QMessageBox
 from scipy import spatial
 from wholebrain.Utils.plot3DBrain_Utils import setUpGlasser360, multiview5
 from matplotlib import cm, pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from wholebrain.Utils.plot3DBrain import *
+import pyreadr
+import pandas as pd
+import re
+
+directory = "./3D_brainmap"
 
 
 def find_closest_points(reference, target):
@@ -11,8 +16,25 @@ def find_closest_points(reference, target):
     dist, indexes = tree.query(target)
     return indexes
 
+
+def set_up_cortex(coordinates):
+    flat_L = nib.load(directory + '/L.flat.32k_fs_LR.surf.gii')
+    flat_R = nib.load(directory + '/R.flat.32k_fs_LR.surf.gii')
+    model_L = nib.load(directory + '/L.mid.32k_fs_LR.surf.gii')
+    model_R = nib.load(directory + '/R.mid.32k_fs_LR.surf.gii')
+
+    cortex = {
+        'map_L': find_closest_points(coordinates, model_L.darrays[0].data),
+        'map_R': find_closest_points(coordinates, model_R.darrays[0].data),
+        'flat_L': flat_L, 'flat_R': flat_R,
+        'model_L': model_L, 'model_R': model_R
+    }
+
+    return cortex
+
+
 class Print3DBrain(QWidget):
-    def __init__(self, data, crtx = None):
+    def __init__(self, data):
         super().__init__()
         self.figure, self.ax = plt.subplots(2, 3, figsize=(15, 10))
         self.canvas = FigureCanvas(self.figure)
@@ -20,22 +42,30 @@ class Print3DBrain(QWidget):
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.canvas)
         self.setLayout(self.layout)
-        self.plot_3d_brain(data, crtx)
+        self.plot_3d_brain(data)
 
-    def plot_3d_brain(self, b_data, crtx):
-        if crtx is None:
+    def plot_3d_brain(self, b_data):
+        dlg = QMessageBox(self)
+        dlg.setWindowTitle("Default configuration")
+        dlg.setText("You want to use Glasser360? Otherwise you will have to upload a config file.")
+        dlg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        button = dlg.exec()
+        if button == QMessageBox.Yes:
             crtx = setUpGlasser360()
-        #### Preguntar per fitxer de configuració
-        result = []
-        with open("C:/UDG/TFM/Glasser360/glasser_coords.txt", 'r') as stream:
-            lines = stream.readlines()
-            for line in lines:
-                values = [float(val) for val in line.strip().replace(' ', '\t').split('\t')]
-                result.append(values)
+        else:
+            filename, _ = QFileDialog.getOpenFileName(
+                parent=self,
+                caption="Open RDA files...",
+                filter="Map files (*.rda)"
+            )
+            result = pyreadr.read_r(filename)
+            pattern = r"\/([^\/]+)\.rda$"
+            name = re.search(pattern, filename).group(1)
+            df = pd.DataFrame(result[name])
+            df = df[df['lobe'] != "Cerebellum"]
+            coords_from_file = df[['x.mni', 'y.mni', 'z.mni']].values.tolist()
+            crtx = set_up_cortex(coords_from_file)
 
-        #Take file and do find_closest_points with 32k nodes
-        #mm = find_closest_points(result,b_data)
-        print(result)
         data = {'func_L': b_data, 'func_R': b_data}
         testColors = cm.YlOrBr
         self.plt_brainview(crtx, data, len(b_data), testColors, lightingBias=0.1, mode='flatWire', shadowed=True)
