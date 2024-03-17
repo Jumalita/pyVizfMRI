@@ -5,7 +5,6 @@ from wholebrain.Observables import (FC, phFCD, swFCD, GBC)
 from PySide6.QtWidgets import (QVBoxLayout,
                                QDialog)
 import wholebrain.Observables.BOLDFilters as filters
-import numpy as np
 
 filters.k = 2  # 2nd order butterworth filter
 filters.flp = .008  # lowpass frequency of filter
@@ -38,10 +37,10 @@ class BaseDialog(QDialog):
 
 class ChartFactory:
     @staticmethod
-    def get_chart_data(chart, transpose=False):
+    def get_chart_data(chart):
         r_min, r_max = chart.get_range(False)
         data = chart.get_data()
-        return data[:, r_min:r_max].T if transpose else data[:, r_min:r_max]
+        return data[:, r_min:r_max]
 
     @staticmethod
     def create_heatmap(chart, transformation_function):

@@ -1,13 +1,18 @@
-import numpy as np
 from PySide6.QtWidgets import QWidget, QVBoxLayout
+from scipy import spatial
 from wholebrain.Utils.plot3DBrain_Utils import setUpGlasser360, multiview5
 from matplotlib import cm, pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from wholebrain.Utils.plot3DBrain import *
-import nibabel as nib
+
+
+def find_closest_points(reference, target):
+    tree = spatial.cKDTree(reference)
+    dist, indexes = tree.query(target)
+    return indexes
 
 class Print3DBrain(QWidget):
-    def __init__(self, data):
+    def __init__(self, data, crtx = None):
         super().__init__()
         self.figure, self.ax = plt.subplots(2, 3, figsize=(15, 10))
         self.canvas = FigureCanvas(self.figure)
@@ -15,10 +20,22 @@ class Print3DBrain(QWidget):
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.canvas)
         self.setLayout(self.layout)
-        self.plot_3d_brain(data)
+        self.plot_3d_brain(data, crtx)
 
-    def plot_3d_brain(self,b_data):
-        crtx = setUpGlasser360()
+    def plot_3d_brain(self, b_data, crtx):
+        if crtx is None:
+            crtx = setUpGlasser360()
+        #### Preguntar per fitxer de configuració
+        result = []
+        with open("C:/UDG/TFM/Glasser360/glasser_coords.txt", 'r') as stream:
+            lines = stream.readlines()
+            for line in lines:
+                values = [float(val) for val in line.strip().replace(' ', '\t').split('\t')]
+                result.append(values)
+
+        #Take file and do find_closest_points with 32k nodes
+        #mm = find_closest_points(result,b_data)
+        print(result)
         data = {'func_L': b_data, 'func_R': b_data}
         testColors = cm.YlOrBr
         self.plt_brainview(crtx, data, len(b_data), testColors, lightingBias=0.1, mode='flatWire', shadowed=True)

@@ -82,7 +82,7 @@ class MainWindow(QMainWindow):
     def delete_data_tab(self, index):
         dlg = QMessageBox(self)
         dlg.setWindowTitle("Alert!")
-        dlg.setText("Closing this tab will make you lose your work and its corresponding dialogs. Cointinue?")
+        dlg.setText("Closing this tab will make you lose your work and its corresponding dialogs. Continue?")
         dlg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         button = dlg.exec()
         if button == QMessageBox.Yes:
