@@ -1,7 +1,6 @@
 import sys
+import csv
 import numpy as np
-import scipy.io as sio
-import nibabel as nib
 from PySide6.QtWidgets import (QApplication,
                                QMainWindow,
                                QTabWidget,
@@ -43,36 +42,24 @@ class MainWindow(QMainWindow):
         file_menu.addAction(open_file_action)
 
     def open_file(self):
+        # Files accepted will be CSV
         filename, _ = QFileDialog.getOpenFileName(
             parent=self,
-            caption="Open NPY/Mat/Nii/TXT files...",
-            filter="fMRI files (*.npy *.mat *.nii *.txt)"
+            caption="Open CSV files...",
+            filter="fMRI files (*.csv)"
         )
         if filename:
-            if filename.endswith(".mat"):  # TODO: recheck -give a selector if more than one dict
-                data = sio.loadmat(filename)['fc_s0003']
-            elif filename.endswith(".nii"):
-                img = nib.load(filename)
-                data = img.get_fdata()
-            elif filename.endswith(".npy"):
-                data = np.load(filename)
-            elif filename.endswith(".txt"):
-                result = []
-                with open(filename, 'r') as stream:
-                    lines = stream.readlines()
-                    for line in lines:
-                        values = [float(val) for val in line.strip().replace(' ', '\t').split('\t')]
-                        result.append(values)
-                data = np.array(result)
+            data = []
+            if filename.endswith(".csv"):
+                with open(filename, 'r') as file:
+                    csv_reader = csv.reader(file)
+                    for row in csv_reader:
+                        row = [float(value) for value in row]
+                        data.append(row)
             else:
                 raise ValueError("Reading file with incorrect format")
 
-            if len(data.shape) == 3:
-                for i in range(0, data.shape[0]):
-                    suffix = f"_{i}" if data.shape[0] > 1 else ""
-                    self.add_data_tab(data[i], Path(filename).stem + suffix)
-            elif len(data.shape) == 2:
-                self.add_data_tab(data, Path(filename).stem)
+            self.add_data_tab(np.array(data), Path(filename).stem)
 
     def add_data_tab(self, data, name):
         tab = DataTab(data, name)
