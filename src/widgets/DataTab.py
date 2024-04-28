@@ -99,7 +99,7 @@ class DataTab(QWidget):
         self.edit_layout.activate()
 
     def sw(self):
-        self.dialog_sw = BaseDialog(self.chart, "fc") #TODO
+        self.dialog_sw = BaseDialog(self.chart, "sw")
         self.dialog_sw.setWindowTitle("SW " + self.name)
         self.dialog_sw.show()
 

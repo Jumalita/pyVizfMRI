@@ -1,6 +1,6 @@
 from src.widgets.HeatMap import HeatMap
 from src.widgets.Print3DBrain import Print3DBrain
-from src.widgets.Histogram import VectorHeatmap
+from src.widgets.Histogram import VectorHeatmap, Histogram
 from wholebrain.Observables import (FC, phFCD, swFCD, GBC)
 from PySide6.QtWidgets import (QVBoxLayout,
                                QDialog)
@@ -30,6 +30,8 @@ class BaseDialog(QDialog):
             return ChartFactory.create_gbc_vector_heatmap(self.chart)
         elif self.chart_type == '3d_brain':
             return ChartFactory.create_gbc_3d_brain(self.chart)
+        elif self.chart_type == 'sw':
+            return ChartFactory.create_sw_heatmap(self.chart)
 
     def update(self):
         self.layout.replaceWidget(self.layout.itemAt(0).widget(), self.calculate())
@@ -46,11 +48,16 @@ class ChartFactory:
     def create_heatmap(chart, transformation_function):
         print("calculating ...")
         transformed_data = transformation_function(ChartFactory.get_chart_data(chart))
+        print(transformed_data)
         return HeatMap(transformed_data) #with or without np.corrcoef ?????
 
     @staticmethod
     def create_fc_heatmap(chart):
         return ChartFactory.create_heatmap(chart, FC.from_fMRI)
+
+    @staticmethod
+    def create_sw_heatmap(chart):
+        return Histogram(swFCD.from_fMRI(ChartFactory.get_chart_data(chart)))
 
     @staticmethod
     def create_phase_heatmap(chart):
@@ -63,3 +70,4 @@ class ChartFactory:
     @staticmethod
     def create_gbc_3d_brain(chart):
         return Print3DBrain(GBC.from_fMRI(ChartFactory.get_chart_data(chart)))
+
