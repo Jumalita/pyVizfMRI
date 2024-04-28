@@ -2,7 +2,7 @@ from src.widgets.HeatMap import HeatMap
 from src.widgets.Print3DBrain import Print3DBrain
 from src.widgets.Histogram import VectorHeatmap, Histogram
 from wholebrain.Observables import (FC, phFCD, swFCD, GBC)
-from PySide6.QtWidgets import (QVBoxLayout,
+from PySide6.QtWidgets import (QVBoxLayout, QFileDialog, QPushButton,
                                QDialog, QLabel, QWidget)
 import wholebrain.Observables.BOLDFilters as filters
 
@@ -21,6 +21,12 @@ class BaseDialog(QDialog):
         self.setMinimumHeight(500)
         self.setMinimumWidth(400)
         self.layout.addWidget(self.calculate())
+
+        # Add Save button
+        self.save_button = QPushButton("Save as PNG")
+        self.save_button.clicked.connect(self.save_chart)
+        self.layout.addWidget(self.save_button)
+
         self.setLayout(self.layout)
 
     def calculate(self):
@@ -49,6 +55,14 @@ class BaseDialog(QDialog):
         if existing_widget is not None:
             existing_widget.deleteLater()
         self.layout.addWidget(new_widget)
+
+    def save_chart(self):
+        filepath, _ = QFileDialog.getSaveFileName(self, "Save Chart", "", "PNG (*.png)")
+        if filepath:
+            chart_widget = self.layout.itemAt(0).widget()
+            if chart_widget:
+                pixmap = chart_widget.grab()
+                pixmap.save(filepath, "PNG")
 
 
 class ChartFactory:
