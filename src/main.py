@@ -6,7 +6,8 @@ from PySide6.QtWidgets import (QApplication,
                                QTabWidget,
                                QToolBar,
                                QMessageBox,
-                               QFileDialog)
+                               QFileDialog,
+                               QPushButton)
 from PySide6.QtGui import QAction
 from pathlib import Path
 
@@ -20,11 +21,13 @@ class MainWindow(QMainWindow):
         self.tab_names = {}
 
         self.setWindowTitle("fMRI Visualizer")
+        self.setMinimumHeight(100)
+        self.setMinimumWidth(200)
 
         self.tabs = QTabWidget()
         self.tabs.setTabPosition(QTabWidget.TabPosition.North)
         self.tabs.setMovable(True)
-        self.tabs.tabCloseRequested.connect(self.delete_data_tab)
+        self.tabs.tabCloseRequested.connect(self.close_data_tab)
         self.tabs.setTabsClosable(True)
 
         self.setCentralWidget(self.tabs)
@@ -40,6 +43,11 @@ class MainWindow(QMainWindow):
         open_file_action.triggered.connect(self.open_file)
 
         file_menu.addAction(open_file_action)
+
+        # Add Open File Button
+        self.open_file_button = QPushButton("Open File", self)
+        self.open_file_button.setGeometry(50, 50, 100, 30)
+        self.open_file_button.clicked.connect(self.open_file)
 
     def open_file(self):
         # Files accepted will be CSV
@@ -60,12 +68,20 @@ class MainWindow(QMainWindow):
                 raise ValueError("Reading file with incorrect format")
 
             self.add_data_tab(np.array(data), Path(filename).stem)
+            self.open_file_button.hide()
+            self.adapt_screen_to_tab()
+
+    def adapt_screen_to_tab(self):
+        current_tab = self.tabs.currentWidget()
+        if current_tab:
+            tab_size = current_tab.sizeHint()
+            self.resize(tab_size.width() + 100, tab_size.height() + 200)
 
     def add_data_tab(self, data, name):
         tab = DataTab(data, name)
         self.tabs.addTab(tab, name)
 
-    def delete_data_tab(self, index):
+    def close_data_tab(self, index):
         dlg = QMessageBox(self)
         dlg.setWindowTitle("Alert!")
         dlg.setText("Closing this tab will make you lose your work and its corresponding dialogs. Continue?")
@@ -74,6 +90,21 @@ class MainWindow(QMainWindow):
         if button == QMessageBox.Yes:
             self.tabs.widget(index).before_close()
             self.tabs.removeTab(index)
+            if self.tabs.count() == 0:
+                self.open_file_button.show()
+
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self, 'Message',
+                                     "Are you sure to quit? All tabs will close, no progress will be saved.", QMessageBox.Yes |
+                                     QMessageBox.No, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            while self.tabs.count() > 0:
+                self.tabs.widget(0).before_close()
+                self.tabs.removeTab(0)
+            event.accept()
+        else:
+            event.ignore()
 
 
 app = QApplication(sys.argv)
