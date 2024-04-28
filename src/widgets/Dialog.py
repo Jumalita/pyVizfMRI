@@ -3,7 +3,7 @@ from src.widgets.Print3DBrain import Print3DBrain
 from src.widgets.Histogram import VectorHeatmap, Histogram
 from wholebrain.Observables import (FC, phFCD, swFCD, GBC)
 from PySide6.QtWidgets import (QVBoxLayout,
-                               QDialog)
+                               QDialog, QLabel, QWidget)
 import wholebrain.Observables.BOLDFilters as filters
 
 filters.k = 2  # 2nd order butterworth filter
@@ -12,29 +12,52 @@ filters.fhi = .08  # highpass
 filters.TR = 0.754  # sampling interval
 
 
+class ErrorDialog(QDialog):
+    def __init__(self, message, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Error")
+        self.layout = QVBoxLayout(self)
+        self.label = QLabel(message)
+        self.layout.addWidget(self.label)
+
+
 class BaseDialog(QDialog):
     def __init__(self, chart, chart_type):
         super().__init__()
         self.layout = QVBoxLayout()
         self.chart = chart
         self.chart_type = chart_type
+        self.setMinimumHeight(500)
+        self.setMinimumWidth(400)
         self.layout.addWidget(self.calculate())
         self.setLayout(self.layout)
 
     def calculate(self):
-        if self.chart_type == 'fc':
-            return ChartFactory.create_fc_heatmap(self.chart)
-        elif self.chart_type == 'phase':
-            return ChartFactory.create_phase_heatmap(self.chart)
-        elif self.chart_type == 'vector_heatmap':
-            return ChartFactory.create_gbc_vector_heatmap(self.chart)
-        elif self.chart_type == '3d_brain':
-            return ChartFactory.create_gbc_3d_brain(self.chart)
-        elif self.chart_type == 'sw':
-            return ChartFactory.create_sw_heatmap(self.chart)
+        try:
+            if self.chart_type == 'fc':
+                return ChartFactory.create_fc_heatmap(self.chart)
+            elif self.chart_type == 'phase':
+                return ChartFactory.create_phase_heatmap(self.chart)
+            elif self.chart_type == 'vector_heatmap':
+                return ChartFactory.create_gbc_vector_heatmap(self.chart)
+            elif self.chart_type == '3d_brain':
+                return ChartFactory.create_gbc_3d_brain(self.chart)
+            elif self.chart_type == 'sw':
+                return ChartFactory.create_sw_heatmap(self.chart)
+        except Exception as e:
+            widget = QWidget()
+            label = QLabel("Phase cannot be computed: " + str(e))
+            layout = QVBoxLayout()
+            layout.addWidget(label)
+            widget.setLayout(layout)
+            return widget
 
     def update(self):
-        self.layout.replaceWidget(self.layout.itemAt(0).widget(), self.calculate())
+        existing_widget = self.layout.itemAt(0).widget()
+        new_widget = self.calculate()
+        if existing_widget is not None:
+            existing_widget.deleteLater()
+        self.layout.addWidget(new_widget)
 
 
 class ChartFactory:
@@ -61,6 +84,7 @@ class ChartFactory:
     @staticmethod
     def create_phase_heatmap(chart):
         return ChartFactory.create_heatmap(chart, lambda data: phFCD.buildFullMatrix(phFCD.from_fMRI(data, applyFilters=False)))
+
 
     @staticmethod
     def create_gbc_vector_heatmap(chart):

@@ -138,11 +138,16 @@ class DataTab(QWidget):
     def before_close(self):
         if self.dialog_fc:
             self.dialog_fc.close()
+            self.dialog_fc = None
         if self.dialog_gbc:
             self.dialog_gbc.close()
+            self.dialog_gbc = None
         if self.dialog_gbc3D:
             self.dialog_gbc3D.close()
+            self.dialog_gbc3D = None
         if self.dialog_sw:
             self.dialog_sw.close()
+            self.dialog_sw = None
         if self.dialog_phase:
             self.dialog_phase.close()
+            self.dialog_phase = None
