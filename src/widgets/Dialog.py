@@ -48,7 +48,6 @@ class ChartFactory:
     def create_heatmap(chart, transformation_function):
         print("calculating ...")
         transformed_data = transformation_function(ChartFactory.get_chart_data(chart))
-        print(transformed_data)
         return HeatMap(transformed_data) #with or without np.corrcoef ?????
 
     @staticmethod
