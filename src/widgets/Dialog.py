@@ -12,15 +12,6 @@ filters.fhi = .08  # highpass
 filters.TR = 0.754  # sampling interval
 
 
-class ErrorDialog(QDialog):
-    def __init__(self, message, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Error")
-        self.layout = QVBoxLayout(self)
-        self.label = QLabel(message)
-        self.layout.addWidget(self.label)
-
-
 class BaseDialog(QDialog):
     def __init__(self, chart, chart_type):
         super().__init__()
