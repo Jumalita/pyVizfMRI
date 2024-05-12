@@ -1,4 +1,5 @@
 from src.widgets.HeatMap import HeatMap
+from src.widgets.sw_params_chooser_dialog import SWParamsDialog
 from src.widgets.Print3DBrain import Print3DBrain
 from src.widgets.Histogram import VectorHeatmap, Histogram
 from wholebrain.Observables import (FC, phFCD, swFCD, GBC)
@@ -47,6 +48,7 @@ class BaseDialog(QDialog):
             layout = QVBoxLayout()
             layout.addWidget(label)
             widget.setLayout(layout)
+            self.save_button.setDisabled(True)
             return widget
 
     def update(self):
@@ -70,13 +72,18 @@ class ChartFactory:
     def get_chart_data(chart):
         r_min, r_max = chart.get_range(False)
         data = chart.get_data()
-        return data[:, r_min:r_max]
+
+        print(data.shape)
+        print(data[r_min:r_max+1].shape)
+        print(data[:, r_min:r_max+1].shape)
+
+        return data[:,r_min:r_max+1]
 
     @staticmethod
     def create_heatmap(chart, transformation_function):
         print("calculating ...")
         transformed_data = transformation_function(ChartFactory.get_chart_data(chart))
-        return HeatMap(transformed_data) #with or without np.corrcoef ?????
+        return HeatMap(transformed_data.T) #with or without np.corrcoef ?????
 
     @staticmethod
     def create_fc_heatmap(chart):
@@ -84,7 +91,13 @@ class ChartFactory:
 
     @staticmethod
     def create_sw_heatmap(chart):
-        return Histogram(swFCD.from_fMRI(ChartFactory.get_chart_data(chart)))
+        r_min, r_max = chart.get_range(False)
+        data = chart.get_data()
+
+        params_dialog = SWParamsDialog(swFCD, data[r_min:r_max+1])
+        params_dialog.exec()
+        data = swFCD.from_fMRI(ChartFactory.get_chart_data(chart))
+        return HeatMap(swFCD.buildFullMatrix(data))
 
     @staticmethod
     def create_phase_heatmap(chart):

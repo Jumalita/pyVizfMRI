@@ -31,3 +31,25 @@ def draw_vertical_line(x, y_min=-2, y_max=2):
     line_series.setPen(pen)
 
     return line_series
+
+
+def draw_vertical_line_w_range(x, size, y_min=-2, y_max=2):
+    line_series = QLineSeries()
+    line_series.append(x, y_min)
+    line_series.append(x, y_max)
+
+    pen = line_series.pen()
+    pen.setColor(Qt.black)
+    pen.setWidth(3)
+    line_series.setPen(pen)
+
+    square_series = QLineSeries()
+    square_series.append(x, y_min)
+    square_series.append(x, y_max)
+
+    pen2 = line_series.pen()
+    pen2.setColor(QColor(194, 197, 204, 128))
+    pen2.setWidth(size * 2)
+    square_series.setPen(pen2)
+
+    return line_series, square_series

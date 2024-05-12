@@ -69,11 +69,11 @@ class DataTab(QWidget):
         self.editing = not self.editing
         if self.editing:
             self.range_control_widget.relocate_range()
-            self.chart.change_mode(True)
+            self.chart.change_mode('edit')
             self.show_edit_layout()
         else:
             self.update_dialogs()
-            self.chart.change_mode(False)
+            self.chart.change_mode('')
             self.show_control_layout()
 
     def show_control_layout(self):
