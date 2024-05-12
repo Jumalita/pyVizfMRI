@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("fMRI Visualizer")
         self.setMinimumHeight(100)
-        self.setMinimumWidth(200)
+        self.setMinimumWidth(300)
 
         self.tabs = QTabWidget()
         self.tabs.setTabPosition(QTabWidget.TabPosition.North)
@@ -42,11 +42,22 @@ class MainWindow(QMainWindow):
         open_file_action = QAction("Open file", self)
         open_file_action.triggered.connect(self.open_file)
 
+        transform_file_action = QAction("Transform file", self)
+        transform_file_action.triggered.connect(self.open_file)  # TODO: transform file
+
         file_menu.addAction(open_file_action)
+        file_menu.addAction(transform_file_action)
+
+        options_menu = menu.addMenu("&Options")  # TODO: options menu
+
+        modify_options_action = QAction("Configure settings", self)
+        modify_options_action.triggered.connect(self.open_file)
+
+        options_menu.addAction(modify_options_action)
 
         # Add Open File Button
         self.open_file_button = QPushButton("Open File", self)
-        self.open_file_button.setGeometry(50, 50, 100, 30)
+        self.open_file_button.setGeometry(100, 50, 100, 30)
         self.open_file_button.clicked.connect(self.open_file)
 
     def open_file(self):
@@ -94,17 +105,21 @@ class MainWindow(QMainWindow):
                 self.open_file_button.show()
 
     def closeEvent(self, event):
-        reply = QMessageBox.question(self, 'Message',
-                                     "Are you sure to quit? All tabs will close, no progress will be saved.", QMessageBox.Yes |
-                                     QMessageBox.No, QMessageBox.No)
+        if self.tabs.count() != 0:
+            reply = QMessageBox.question(self, 'Message',
+                                         "Are you sure to quit? All tabs will close, no progress will be saved.",
+                                         QMessageBox.Yes |
+                                         QMessageBox.No, QMessageBox.No)
 
-        if reply == QMessageBox.Yes:
-            while self.tabs.count() > 0:
-                self.tabs.widget(0).before_close()
-                self.tabs.removeTab(0)
-            event.accept()
+            if reply == QMessageBox.Yes:
+                while self.tabs.count() > 0:
+                    self.tabs.widget(0).before_close()
+                    self.tabs.removeTab(0)
+                event.accept()
+            else:
+                event.ignore()
         else:
-            event.ignore()
+            event.accept()
 
 
 app = QApplication(sys.argv)
