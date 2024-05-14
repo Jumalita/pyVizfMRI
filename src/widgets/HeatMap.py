@@ -1,3 +1,4 @@
+import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -17,6 +18,9 @@ class HeatMap(QWidget):
 
     def update_data(self, data):
         self.ax.clear()
+
+        if True:
+            data = np.fliplr(data)
 
         sns.heatmap(data, ax=self.ax, cmap='cividis', cbar=True, cbar_kws={'label': 'Values'})
 

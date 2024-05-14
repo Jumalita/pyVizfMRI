@@ -67,7 +67,6 @@ class BaseDialog(QDialog):
                 pixmap = chart_widget.grab()
                 pixmap.save(filepath, "PNG")
 
-
 class ChartFactory:
     @staticmethod
     def get_chart_data(chart):
