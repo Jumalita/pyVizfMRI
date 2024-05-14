@@ -17,21 +17,22 @@ class BaseDialog(QDialog):
     def __init__(self, chart, chart_type):
         super().__init__()
         self.layout = QVBoxLayout()
+
+        self.save_button = QPushButton("Save as PNG")
+        self.save_button.clicked.connect(self.save_chart)
+        self.layout.addWidget(self.save_button)
+
         self.chart = chart
         self.chart_type = chart_type
         self.setMinimumHeight(500)
         self.setMinimumWidth(400)
         self.layout.addWidget(self.calculate())
 
-        # Add Save button
-        self.save_button = QPushButton("Save as PNG")
-        self.save_button.clicked.connect(self.save_chart)
-        self.layout.addWidget(self.save_button)
-
         self.setLayout(self.layout)
 
     def calculate(self):
         try:
+            self.save_button.setDisabled(False)
             if self.chart_type == 'fc':
                 return ChartFactory.create_fc_heatmap(self.chart)
             elif self.chart_type == 'phase':
@@ -52,7 +53,7 @@ class BaseDialog(QDialog):
             return widget
 
     def update(self):
-        existing_widget = self.layout.itemAt(0).widget()
+        existing_widget = self.layout.itemAt(1).widget()
         new_widget = self.calculate()
         if existing_widget is not None:
             existing_widget.deleteLater()
@@ -72,32 +73,22 @@ class ChartFactory:
     def get_chart_data(chart):
         r_min, r_max = chart.get_range(False)
         data = chart.get_data()
-
-        print(data.shape)
-        print(data[r_min:r_max+1].shape)
-        print(data[:, r_min:r_max+1].shape)
-
-        return data[:,r_min:r_max+1]
+        return data[r_min:r_max+1]
 
     @staticmethod
     def create_heatmap(chart, transformation_function):
-        print("calculating ...")
         transformed_data = transformation_function(ChartFactory.get_chart_data(chart))
-        return HeatMap(transformed_data.T) #with or without np.corrcoef ?????
+        return HeatMap(transformed_data.T)
 
     @staticmethod
     def create_fc_heatmap(chart):
-        return ChartFactory.create_heatmap(chart, FC.from_fMRI)
+        return ChartFactory.create_heatmap(chart, lambda data: FC.from_fMRI(data.T))
 
     @staticmethod
     def create_sw_heatmap(chart):
-        r_min, r_max = chart.get_range(False)
-        data = chart.get_data()
-
-        params_dialog = SWParamsDialog(swFCD, data[r_min:r_max+1])
+        params_dialog = SWParamsDialog(swFCD, ChartFactory.get_chart_data(chart))
         params_dialog.exec()
-        data = swFCD.from_fMRI(ChartFactory.get_chart_data(chart))
-        return HeatMap(swFCD.buildFullMatrix(data))
+        return ChartFactory.create_heatmap(chart, lambda data: swFCD.buildFullMatrix(swFCD.from_fMRI(data.T)))
 
     @staticmethod
     def create_phase_heatmap(chart):
