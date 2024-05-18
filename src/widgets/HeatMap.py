@@ -3,6 +3,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PySide6.QtWidgets import QWidget, QVBoxLayout
+import global_variables as settings
 
 class HeatMap(QWidget):
     def __init__(self, data):
@@ -19,7 +20,7 @@ class HeatMap(QWidget):
     def update_data(self, data):
         self.ax.clear()
 
-        if True:
+        if settings.diagonal_right:
             data = np.fliplr(data)
 
         sns.heatmap(data, ax=self.ax, cmap='cividis', cbar=True, cbar_kws={'label': 'Values'})
