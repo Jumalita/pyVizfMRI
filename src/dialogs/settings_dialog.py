@@ -1,8 +1,8 @@
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QRadioButton, QLabel, QSpinBox, QDoubleSpinBox, QDialogButtonBox
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QRadioButton, QLabel, QSpinBox, QDoubleSpinBox, QDialogButtonBox, QCheckBox
 
 
 class SettingsDialog(QDialog):
-    def __init__(self, diagonal_right, k, TR, flp, fhi):
+    def __init__(self, diagonal_right, k, TR, flp, fhi, dTrent):
         super().__init__()
         self.k = k
         self.TR = TR
@@ -69,6 +69,10 @@ class SettingsDialog(QDialog):
         layout.addWidget(fhi_label)
         layout.addWidget(self.fhi_input)
 
+        #dTrent
+        self.dTrent_checkbox = QCheckBox("Apply final Detrend")
+        layout.addWidget(self.dTrent_checkbox)
+
         # Buttons
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.accept)
@@ -89,4 +93,5 @@ class SettingsDialog(QDialog):
         TR = float(self.TR_input.value())
         flp = float(self.flp_input.value())
         fhi = float(self.fhi_input.value())
-        return diagonal_right, k, TR, flp, fhi
+        dTrent = self.dTrent_checkbox.isChecked()
+        return diagonal_right, k, TR, flp, fhi, dTrent

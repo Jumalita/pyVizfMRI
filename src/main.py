@@ -16,8 +16,6 @@ from widgets.DataTab import DataTab
 import wholebrain.Observables.BOLDFilters as filters
 import global_variables as settings
 
-
-settings.diagonal_right = False
 filters.k = 2  # 2nd order butterworth filter
 filters.flp = .008  # lowpass frequency of filter
 filters.fhi = .08  # highpass
@@ -102,14 +100,15 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(tab, name)
 
     def configure_settings(self):
-        dialog = SettingsDialog(settings.diagonal_right, filters.k, filters.TR, filters.flp, filters.fhi)
+        dialog = SettingsDialog(settings.diagonal_right, filters.k, filters.TR, filters.flp, filters.fhi, filters.finalDetrend)
         if dialog.exec() == QDialog.Accepted:
-            diagonal, k, TR, flp, fhi = dialog.get_settings()
+            diagonal, k, TR, flp, fhi, dTrent = dialog.get_settings()
             settings.diagonal_right = diagonal
             filters.k = k
             filters.TR = TR
             filters.flp = flp
             filters.fhi = fhi
+            filters.finalDetrend = dTrent
             for i in range(self.tabs.count()):
                 self.tabs.widget(i).update_dialogs()
 
