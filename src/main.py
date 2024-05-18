@@ -7,12 +7,19 @@ from PySide6.QtWidgets import (QApplication,
                                QToolBar,
                                QMessageBox,
                                QFileDialog,
-                               QPushButton)
+                               QPushButton,
+                               QDialog)
 from PySide6.QtGui import QAction
 from pathlib import Path
-
+from dialogs.settings_dialog import SettingsDialog
 from widgets.DataTab import DataTab
+import wholebrain.Observables.BOLDFilters as filters
+import global_variables as settings
 
+filters.k = 2  # 2nd order butterworth filter
+filters.flp = .008  # lowpass frequency of filter
+filters.fhi = .08  # highpass
+filters.TR = 0.754  # sampling interval
 
 class MainWindow(QMainWindow):
 
@@ -48,10 +55,10 @@ class MainWindow(QMainWindow):
         file_menu.addAction(open_file_action)
         file_menu.addAction(transform_file_action)
 
-        options_menu = menu.addMenu("&Options")  # TODO: options menu
+        options_menu = menu.addMenu("&Options")
 
         modify_options_action = QAction("Configure settings", self)
-        modify_options_action.triggered.connect(self.open_file)
+        modify_options_action.triggered.connect(self.configure_settings)
 
         options_menu.addAction(modify_options_action)
 
@@ -91,6 +98,20 @@ class MainWindow(QMainWindow):
     def add_data_tab(self, data, name):
         tab = DataTab(data, name)
         self.tabs.addTab(tab, name)
+
+    def configure_settings(self):
+        dialog = SettingsDialog(settings.diagonal_right, filters.k, filters.TR, filters.flp, filters.fhi, filters.finalDetrend)
+        if dialog.exec() == QDialog.Accepted:
+            diagonal, k, TR, flp, fhi, dTrent = dialog.get_settings()
+            settings.diagonal_right = diagonal
+            filters.k = k
+            filters.TR = TR
+            filters.flp = flp
+            filters.fhi = fhi
+            filters.finalDetrend = dTrent
+            for i in range(self.tabs.count()):
+                self.tabs.widget(i).update_dialogs()
+
 
     def close_data_tab(self, index):
         dlg = QMessageBox(self)

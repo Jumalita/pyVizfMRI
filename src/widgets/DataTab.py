@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (QWidget,
                                QPushButton)
 from widgets.series.MultipleLineChart import MultipleLineChart
 from widgets.series.RangeControlWidget import RangeControlWidget
-from widgets.Dialog import BaseDialog
+from dialogs.BaseChartDialog import BaseChartDialog
 
 
 class DataTab(QWidget):
@@ -99,27 +99,27 @@ class DataTab(QWidget):
         self.edit_layout.activate()
 
     def sw(self):
-        self.dialog_sw = BaseDialog(self.chart, "sw")
+        self.dialog_sw = BaseChartDialog(self.chart, "sw")
         self.dialog_sw.setWindowTitle("SW " + self.name)
         self.dialog_sw.show()
 
     def phase(self):
-        self.dialog_phase = BaseDialog(self.chart, "phase")
+        self.dialog_phase = BaseChartDialog(self.chart, "phase")
         self.dialog_phase.setWindowTitle("Phase " + self.name)
         self.dialog_phase.show()
 
     def fc(self):
-        self.dialog_fc = BaseDialog(self.chart, "fc")
+        self.dialog_fc = BaseChartDialog(self.chart, "fc")
         self.dialog_fc.setWindowTitle("FC " + self.name)
         self.dialog_fc.show()
 
     def gbc(self):
-        self.dialog_gbc = BaseDialog(self.chart, "vector_heatmap")
+        self.dialog_gbc = BaseChartDialog(self.chart, "vector_heatmap")
         self.dialog_gbc.setWindowTitle("GCB " + self.name)
         self.dialog_gbc.show()
 
     def gbc3D(self):
-        self.dialog_gbc3D = BaseDialog(self.chart, "3d_brain")
+        self.dialog_gbc3D = BaseChartDialog(self.chart, "3d_brain")
         self.dialog_gbc3D.setWindowTitle("3D Brain " + self.name)
         self.dialog_gbc3D.show()
 
