@@ -1,5 +1,6 @@
 import sys
 import csv
+import tempfile
 import numpy as np
 from PySide6.QtWidgets import (QApplication,
                                QMainWindow,
@@ -12,14 +13,17 @@ from PySide6.QtWidgets import (QApplication,
 from PySide6.QtGui import QAction
 from pathlib import Path
 from dialogs.settings_dialog import SettingsDialog
+from dialogs.fileconverter_manager import FileConverterManager
 from widgets.DataTab import DataTab
 import wholebrain.Observables.BOLDFilters as filters
+from dataConvert.ConverterManager import ConverterManager
 import global_variables as settings
 
 filters.k = 2  # 2nd order butterworth filter
 filters.flp = .008  # lowpass frequency of filter
 filters.fhi = .08  # highpass
 filters.TR = 0.754  # sampling interval
+
 
 class MainWindow(QMainWindow):
 
@@ -46,14 +50,18 @@ class MainWindow(QMainWindow):
 
         file_menu = menu.addMenu("&File")
 
-        open_file_action = QAction("Open file", self)
+        open_file_action = QAction("Open .CSV file", self)
         open_file_action.triggered.connect(self.open_file)
 
-        transform_file_action = QAction("Transform file", self)
-        transform_file_action.triggered.connect(self.open_file)  # TODO: transform file
+        transform_file_action = QAction("Convert and Open File", self)
+        transform_file_action.triggered.connect(self.convert_and_open_file)
+
+        manage_transforms_action = QAction("Manage FileConverter Plugins", self)
+        manage_transforms_action.triggered.connect(self.open_fileconverter_manager)
 
         file_menu.addAction(open_file_action)
         file_menu.addAction(transform_file_action)
+        file_menu.addAction(manage_transforms_action)
 
         options_menu = menu.addMenu("&Options")
 
@@ -63,7 +71,7 @@ class MainWindow(QMainWindow):
         options_menu.addAction(modify_options_action)
 
         # Add Open File Button
-        self.open_file_button = QPushButton("Open File", self)
+        self.open_file_button = QPushButton("Open .CSV File", self)
         self.open_file_button.setGeometry(100, 50, 100, 30)
         self.open_file_button.clicked.connect(self.open_file)
 
@@ -75,19 +83,39 @@ class MainWindow(QMainWindow):
             filter="fMRI files (*.csv)"
         )
         if filename:
-            data = []
-            if filename.endswith(".csv"):
-                with open(filename, 'r') as file:
-                    csv_reader = csv.reader(file)
-                    for row in csv_reader:
-                        row = [float(value) for value in row]
-                        data.append(row)
-            else:
-                raise ValueError("Reading file with incorrect format")
+            self.open_new_tab(filename)
 
-            self.add_data_tab(np.array(data), Path(filename).stem)
-            self.open_file_button.hide()
-            self.adapt_screen_to_tab()
+    def convert_and_open_file(self):
+        options = QFileDialog.Options()
+        file_name, _ = QFileDialog.getOpenFileName(None, "Choose File", "", "All Files (*)", options=options)
+        if file_name:
+            file_ext = file_name.split('.')[-1].lower()
+            converter_manager = ConverterManager()
+            converter = converter_manager.get_converter()
+            if converter:
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as temp_file:
+                    output = temp_file.name
+                    converter.convert(file_name, output)
+                    self.open_new_tab(output)
+
+    def open_fileconverter_manager(self):
+        dialog = FileConverterManager()
+        dialog.exec()
+
+    def open_new_tab(self, filename):
+        data = []
+        if filename.endswith(".csv"):
+            with open(filename, 'r') as file:
+                csv_reader = csv.reader(file)
+                for row in csv_reader:
+                    row = [float(value) for value in row]
+                    data.append(row)
+        else:
+            raise ValueError("Reading file with incorrect format")
+
+        self.add_data_tab(np.array(data), Path(filename).stem)
+        self.open_file_button.hide()
+        self.adapt_screen_to_tab()
 
     def adapt_screen_to_tab(self):
         current_tab = self.tabs.currentWidget()
@@ -100,7 +128,8 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(tab, name)
 
     def configure_settings(self):
-        dialog = SettingsDialog(settings.diagonal_right, filters.k, filters.TR, filters.flp, filters.fhi, filters.finalDetrend)
+        dialog = SettingsDialog(settings.diagonal_right, filters.k, filters.TR, filters.flp, filters.fhi,
+                                filters.finalDetrend)
         if dialog.exec() == QDialog.Accepted:
             diagonal, k, TR, flp, fhi, dTrent = dialog.get_settings()
             settings.diagonal_right = diagonal
@@ -111,7 +140,6 @@ class MainWindow(QMainWindow):
             filters.finalDetrend = dTrent
             for i in range(self.tabs.count()):
                 self.tabs.widget(i).update_dialogs()
-
 
     def close_data_tab(self, index):
         dlg = QMessageBox(self)
