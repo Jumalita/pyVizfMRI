@@ -1,6 +1,6 @@
-# pyVizfMRI
+# 🧠 pyVizfMRI
 
-🎓 Master Thesis Project: Visualization Tool for BOLD Signals
+Master Thesis Project: Visualization Tool for BOLD Signals
 Welcome to the **pyVizfMRI** a Visualization Tool for BOLD Signals! This project is part of a Master Thesis in Data Science at the University of Girona.
 
 ## 📚 Project Overview
