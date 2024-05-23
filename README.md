@@ -1,15 +1,13 @@
 # pyVizfMRI
 
 🎓 Master Thesis Project: Visualization Tool for BOLD Signals
-![University of Girona]([https://upload.wikimedia.org/wikipedia/en/thumb/4/4d/University_of_Girona.svg/1200px-University_of_Girona.svg.png](https://upload.wikimedia.org/wikipedia/commons/d/da/Logo_de_la_universitat_de_girona.png))
-
 Welcome to the **pyVizfMRI** a Visualization Tool for BOLD Signals! This project is part of a Master Thesis in Data Science at the University of Girona.
 
 ## 📚 Project Overview
 
 This project provides a comprehensive visualization tool for BOLD signals using data from fMRI, EEG, and MEG sources. Built on the powerful UE library of Observables, it allows for intricate and interactive data visualization, enabling researchers and students to gain valuable insights into brain activity.
 
-![Overview](overview/overview.png)
+![Overview](overview/overview.PNG)
 
 ## 🚀 Features
 
