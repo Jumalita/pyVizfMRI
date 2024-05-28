@@ -13,6 +13,7 @@ class BaseChartDialog(QDialog):
 
         self.chart = chart
         self.chart_type = chart_type
+        self.default_brain_mapping_config = None
         self.setMinimumHeight(500)
         self.setMinimumWidth(400)
         self.layout.addWidget(self.calculate())
@@ -29,7 +30,9 @@ class BaseChartDialog(QDialog):
             elif self.chart_type == 'vector_heatmap':
                 return ChartFactory.create_gbc_vector_heatmap(self.chart)
             elif self.chart_type == '3d_brain':
-                return ChartFactory.create_gbc_3d_brain(self.chart)
+                chart = ChartFactory.create_gbc_3d_brain(self.chart,self.default_brain_mapping_config)
+                self.default_brain_mapping_config = chart.returnConfig()
+                return chart
             elif self.chart_type == 'sw':
                 return ChartFactory.create_sw_heatmap(self.chart)
         except Exception as e:
@@ -56,5 +59,5 @@ class BaseChartDialog(QDialog):
                 pixmap = chart_widget.grab()
                 pixmap.save(filepath, "PNG")
 
-
-
+    def getConfig(self):
+        return self.default_brain_mapping_config

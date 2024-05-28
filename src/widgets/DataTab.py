@@ -14,6 +14,8 @@ class DataTab(QWidget):
         self.name = name
         self.editing = False
 
+        self.default_brain_mapping_config = None
+
         self.chart = MultipleLineChart(data)
         self.range_control_widget = RangeControlWidget(self.chart, self.change_layout)
 
@@ -120,6 +122,7 @@ class DataTab(QWidget):
 
     def gbc3D(self):
         self.dialog_gbc3D = BaseChartDialog(self.chart, "3d_brain")
+        self.default_brain_mapping_config = self.dialog_gbc3D.getConfig()
         self.dialog_gbc3D.setWindowTitle("3D Brain " + self.name)
         self.dialog_gbc3D.show()
 
