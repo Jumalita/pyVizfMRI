@@ -17,6 +17,7 @@ from dialogs.fileconverter_manager import FileConverterManager
 from widgets.DataTab import DataTab
 import wholebrain.Observables.BOLDFilters as filters
 from dataConvert.ConverterManager import ConverterManager
+from dialogs.brainmapfiles_manager import BrainMapFilesManager
 import global_variables as settings
 
 filters.k = 2  # 2nd order butterworth filter
@@ -59,9 +60,13 @@ class MainWindow(QMainWindow):
         manage_transforms_action = QAction("Manage FileConverter Plugins", self)
         manage_transforms_action.triggered.connect(self.open_fileconverter_manager)
 
+        manage_mappings_action = QAction("Manage Brain Map Files", self)
+        manage_mappings_action.triggered.connect(self.open_brainmapfiles_manager)
+
         file_menu.addAction(open_file_action)
         file_menu.addAction(transform_file_action)
         file_menu.addAction(manage_transforms_action)
+        file_menu.addAction(manage_mappings_action)
 
         options_menu = menu.addMenu("&Options")
 
@@ -100,6 +105,10 @@ class MainWindow(QMainWindow):
 
     def open_fileconverter_manager(self):
         dialog = FileConverterManager()
+        dialog.exec()
+
+    def open_brainmapfiles_manager(self):
+        dialog = BrainMapFilesManager()
         dialog.exec()
 
     def open_new_tab(self, filename):

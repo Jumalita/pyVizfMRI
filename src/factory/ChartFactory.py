@@ -36,5 +36,5 @@ class ChartFactory:
         return VectorHeatmap(GBC.from_fMRI(ChartFactory.get_chart_data(chart)))
 
     @staticmethod
-    def create_gbc_3d_brain(chart):
-        return Print3DBrain(GBC.from_fMRI(ChartFactory.get_chart_data(chart)))
+    def create_gbc_3d_brain(chart,default_config):
+        return Print3DBrain(GBC.from_fMRI(ChartFactory.get_chart_data(chart)),default_config)
